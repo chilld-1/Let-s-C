@@ -27,6 +27,7 @@ type Handler = (data: unknown) => void
 export class SignalingClient {
   private ws: WebSocket | null = null
   private listeners = new Map<EventName, Set<Handler>>()
+  private pending: Record<string, unknown>[] = []
   private reconnectAttempts = 0
   private manualClose = false
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
@@ -48,6 +49,10 @@ export class SignalingClient {
     this.ws.onopen = () => {
       this.reconnectAttempts = 0
       this.emit('connection-state', { state: 'connected' })
+      // flush 连接建立前入队的消息（如 create-room / join-room）
+      const q = this.pending
+      this.pending = []
+      for (const m of q) this.send(m)
     }
     this.ws.onmessage = (ev) => {
       let msg: { type: EventName } & Record<string, unknown>
@@ -61,6 +66,8 @@ export class SignalingClient {
       }
     }
     this.ws.onclose = () => {
+      // 断线后丢弃未发送消息；房间上下文由上层（connection-state handler）负责恢复
+      this.pending = []
       this.emit('connection-state', { state: 'disconnected' })
       if (!this.manualClose) this.scheduleReconnect()
     }
@@ -90,7 +97,8 @@ export class SignalingClient {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(msg))
     } else {
-      this.emit('connection-state', { state: 'reconnecting' })
+      // 未连接时入队，连接建立后统一发送
+      this.pending.push(msg)
     }
   }
 
