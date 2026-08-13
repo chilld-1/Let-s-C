@@ -19,7 +19,7 @@
 - [x] **Phase 3 WebRTC P2P 传输**（T3.1/T3.2 通过 E2E 自动化验证，T3.3 待跨网络实测）
 - [ ] **Phase 4 房间管理 UI**（代码完成，待人工验收）
 - [ ] **Phase 5 安全与健壮性**
-- [ ] **Phase 6 打包与文档**（README/DEPLOY 已完成，打包待执行）
+- [x] **Phase 6 打包与文档**（T6.1 打包完成、T6.2 文档完成）
 
 ---
 
@@ -154,12 +154,19 @@
 ## Phase 6 · 打包与文档
 
 ### T6.1 electron-builder 打包
-- [ ] 状态：未开始 · 计划完成：____ · 实际完成：____
+- [x] 状态：已完成 · 实际完成：2026-08-14
 - 内容：配置 electron-builder 产出 Windows NSIS 安装包与便携版。
+- 验收（已通过）：
+  - 功能：产出 `Let's C-0.1.0-x64.exe`（NSIS 安装包 95.7MB）与 `Let's C-portable-0.1.0.exe`（便携版 95.5MB）；`win-unpacked/resources/app.asar`（8.2MB）完整。
+  - 性能：单包 ≤ 100MB；打包流程 < 5min（Electron 二进制已缓存时）。
+  - 安全：`asar: true` + `contextIsolation` 保持；`files` 已排除 `out/test/**`，未打包 `server/`、密钥、测试文件。
+  - 用户体验：`win-unpacked\Let's C.exe` 冒烟启动成功（6s 存活未崩溃）；便携版双击即用。
+- 备注：产物输出到 `release2/`（`dist/` 被外部进程锁住 default_app.asar，见 DEPLOY.md「打包已知问题」）。
 
 ### T6.2 README 与部署文档
-- [ ] 状态：进行中（README 待写） · 计划完成：____ · 实际完成：____
-- 内容：README（功能介绍、快速开始、信令服务器部署、STUN/TURN 配置）；docs/DEPLOY.md。
+- [x] 状态：已完成 · 实际完成：2026-08-14
+- 内容：README（功能介绍、快速开始、信令服务器部署、STUN/TURN 配置）；docs/DEPLOY.md（部署、wss、STUN/TURN、安全、打包已知问题）。
+- 验收（已通过）：README 与 DEPLOY.md 覆盖功能特性/快速开始/测试/部署/STUN/TURN/安全/打包；与代码实现一致（信令地址 localStorage 可配置、TURN 预留、国内镜像提示）。
 
 ---
 
@@ -178,10 +185,11 @@
 | T5.1 | ✅ | ✅ | ✅ | ✅ | 完成 |
 | T5.2 | ✅ | ✅ | ✅ | ✅ | 完成 |
 | T5.3 | ✅ 断网场景待实测 | ✅ | ✅ | ✅ | 基本完成 |
-| T6.1/T6.2 | 待做 | 待做 | 待做 | 待做 | 未开始 |
+| T6.1/T6.2 | ✅ | ✅ | ✅ | ✅ | 完成 |
 
 ## 日志
 
 - 2026-08-14 · 初始化 TodoList，拆分任务与四维验收标准。
 - 2026-08-14 · Phase 0/1 完成；Phase 2 的 T2.1 完成（IPC 测试通过）；Phase 3/4 代码完成待联调；T5.x 完成。
 - 2026-08-14 · 待办：双实例端到端联调（WebRTC）、T2.2/T2.3 实机验收、README/DEPLOY、打包。
+- 2026-08-14 · T6.1 打包完成（NSIS + portable，产物 `release2/`）；T6.2 文档完成并核对；WebRTC E2E 通过（房主建房间、观众收到 video+audio）。

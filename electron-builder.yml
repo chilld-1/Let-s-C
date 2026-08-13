@@ -1,0 +1,24 @@
+appId: com.letsc.app
+productName: "Let's C"
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**
+  - "!out/test/**"
+  - package.json
+asar: true
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  artifactName: ${productName}-${version}-${arch}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  shortcutName: "Let's C"
+  deleteAppDataOnUninstall: false
+portable:
+  artifactName: ${productName}-portable-${version}.${ext}

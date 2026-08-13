@@ -126,3 +126,41 @@ total-quota=100
 - 加入尝试限速（10s 内最多 5 次），防房间码/密码暴力枚举。
 - 房间码为随机 6 位（去除易混淆字符），不可预测。
 - 建议：敏感直播场景请使用 wss:// 部署 + 设置房间密码。
+
+## 5. Windows 打包已知问题
+
+在部分 Windows 机器上，`npx electron-builder --win` 会在「解压 Electron 后 rename
+`win-unpacked.tmp` → `win-unpacked`」这一步报 `EPERM: operation not permitted`。
+
+原因：杀毒软件 / 文件监控类进程（如本机运行中的 Reasonix、Codex 等）会以只读方式占用刚解压出的
+`resources/default_app.asar`，导致目录重命名被拒。
+
+临时处理（不提交到仓库，`node_modules` 本就在 .gitignore）：
+
+编辑 `node_modules/app-builder-lib/out/util/electronGet.js` 的 `extractArchive`，
+把其中的：
+
+```js
+await fs.rm(dir, { recursive: true, force: true });
+await fs.rename(tmpDir, dir);
+```
+
+替换为「rename 失败时回退为 `fs.cp` 复制」：
+
+```js
+await fs.rm(dir, { recursive: true, force: true });
+try {
+  await fs.rename(tmpDir, dir);
+} catch (e) {
+  const code = e && (e.code || e.errno);
+  if (code === 'EPERM' || code === 'EACCES' || code === 'EBUSY' || code === 'EEXIST') {
+    await fs.cp(tmpDir, dir, { recursive: true, force: true });
+    try { await fs.rm(tmpDir, { recursive: true, force: true }); } catch {}
+  } else {
+    throw e;
+  }
+}
+```
+
+更彻底的做法：打包前先关闭占用文件的后台进程（Reasonix / Codex / 杀毒实时扫描），
+或在杀毒软件中把项目目录加入排除项。产物目录建议用干净路径（如 `-c.directories.output=release2`）。
