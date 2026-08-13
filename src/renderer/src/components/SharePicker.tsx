@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import { DEFAULT_QUALITY, QUALITY_PROFILES, type QualityTier } from '../lib/peer'
 
 interface Props {
   open: boolean
   onClose: () => void
-  onSelect: (windowId: string, windowName: string) => void
+  onSelect: (windowId: string, windowName: string, quality: QualityTier) => void
 }
 
 interface WindowInfo {
@@ -16,6 +17,7 @@ export default function SharePicker({ open, onClose, onSelect }: Props): React.J
   const [windows, setWindows] = useState<WindowInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [quality, setQuality] = useState<QualityTier>(DEFAULT_QUALITY)
 
   useEffect(() => {
     if (!open) return
@@ -43,6 +45,21 @@ export default function SharePicker({ open, onClose, onSelect }: Props): React.J
           只共享你选中的这个窗口；切换到其他应用时，观众那边不会看到其他内容。
         </p>
 
+        <div className="quality-picker">
+          <span className="quality-label">画质</span>
+          {(Object.keys(QUALITY_PROFILES) as QualityTier[]).map((tier) => (
+            <button
+              key={tier}
+              type="button"
+              className={`quality-option ${quality === tier ? 'active' : ''}`}
+              onClick={() => setQuality(tier)}
+            >
+              <span className="quality-name">{QUALITY_PROFILES[tier].label}</span>
+              <span className="quality-hint">{QUALITY_PROFILES[tier].hint}</span>
+            </button>
+          ))}
+        </div>
+
         <div className="window-list">
           {loading && <div className="empty">正在枚举窗口…</div>}
           {!loading && err && <div className="empty error-text">{err}</div>}
@@ -55,7 +72,7 @@ export default function SharePicker({ open, onClose, onSelect }: Props): React.J
               <button
                 key={w.id}
                 className="window-item"
-                onClick={() => onSelect(w.id, w.name)}
+                onClick={() => onSelect(w.id, w.name, quality)}
                 title={w.name}
               >
                 <div className="window-thumb">

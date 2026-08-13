@@ -545,3 +545,43 @@ input {
 .error-text {
   color: #ffb4b8;
 }
+
+/* ---------- 画质档位选择（T2.3） ---------- */
+.quality-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.quality-label {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-right: 2px;
+}
+.quality-option {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.quality-option:hover {
+  border-color: var(--accent);
+}
+.quality-option.active {
+  border-color: var(--accent);
+  background: rgba(251, 114, 153, 0.14);
+}
+.quality-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.quality-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}

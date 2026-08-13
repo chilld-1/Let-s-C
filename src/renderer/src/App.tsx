@@ -4,7 +4,10 @@ import {
   closePeer,
   createPublisherPeer,
   createSubscriberPeer,
-  handleSignal
+  DEFAULT_QUALITY,
+  handleSignal,
+  QUALITY_PROFILES,
+  type QualityTier
 } from './lib/peer'
 import { getClientId, getDefaultName, getServerUrl, saveName, saveServerUrl } from './lib/clientId'
 import Home from './components/Home'
@@ -33,6 +36,7 @@ export default function App(): React.JSX.Element {
   // 观众观看状态
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null)
   const [guestConnState, setGuestConnState] = useState<string>('new')
+  const [quality, setQuality] = useState<QualityTier>(DEFAULT_QUALITY)
 
   const signalingRef = useRef<SignalingClient | null>(null)
   const peersRef = useRef<Map<string, RTCPeerConnection>>(new Map())
@@ -44,6 +48,7 @@ export default function App(): React.JSX.Element {
   const sessionRef = useRef<{ roomId: string; password: string } | null>(null)
   const nameRef = useRef<string>(getDefaultName())
   const serverUrlRef = useRef<string>(serverUrl)
+  const maxBitrateRef = useRef<number>(QUALITY_PROFILES[DEFAULT_QUALITY].maxBitrate)
 
   useEffect(() => {
     phaseRef.current = phase
@@ -120,22 +125,30 @@ export default function App(): React.JSX.Element {
       (data) => sig.signal(peerId, data),
       {
         onStateChange: (s) => setHostPeerStates((prev) => ({ ...prev, [peerId]: s }))
-      }
+      },
+      maxBitrateRef.current
     )
     peersRef.current.set(peerId, pc)
   }, [])
 
   const startShare = useCallback(
-    async (windowId: string, windowName: string) => {
+    async (windowId: string, windowName: string, tier: QualityTier = DEFAULT_QUALITY) => {
       const res = await window.api.selectWindow(windowId)
       if (!res.ok) {
         setError(res.error ?? '选择窗口失败')
         return false
       }
+      const profile = QUALITY_PROFILES[tier]
+      maxBitrateRef.current = profile.maxBitrate
+      setQuality(tier)
       let stream: MediaStream | null = null
       try {
         // 触发主进程 setDisplayMediaRequestHandler → 返回所选窗口 + 系统音频
-        stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+        // 画质档位：分辨率/帧率约束 + 发送端 maxBitrate（见 peer.ts applyMaxBitrate）
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { width: profile.width, height: profile.height, frameRate: profile.frameRate },
+          audio: true
+        })
       } catch (err) {
         setError(`无法获取共享画面：${err instanceof Error ? err.message : String(err)}`)
         return false
@@ -316,9 +329,9 @@ export default function App(): React.JSX.Element {
       <SharePicker
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
-        onSelect={(id, name) => {
+        onSelect={(id, name, tier) => {
           setPickerOpen(false)
-          void startShare(id, name)
+          void startShare(id, name, tier)
         }}
       />
     </>

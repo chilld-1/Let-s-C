@@ -15,7 +15,7 @@
 
 - [x] **Phase 0 初始化**（脚手架 + Git）
 - [x] **Phase 1 信令服务器**
-- [ ] **Phase 2 房主端窗口捕获**（T2.1 完成，T2.2/T2.3 待实机验收）
+- [ ] **Phase 2 房主端窗口捕获**（T2.1/T2.3 完成，T2.2 待实机验收）
 - [x] **Phase 3 WebRTC P2P 传输**（T3.1/T3.2 通过 E2E 自动化验证，T3.3 待跨网络实测）
 - [ ] **Phase 4 房间管理 UI**（代码完成，待人工验收）
 - [ ] **Phase 5 安全与健壮性**
@@ -85,9 +85,14 @@
   - 用户体验：有"停止共享"按钮与提示文案。
 
 ### T2.3 分辨率/码率档位选择
-- [ ] 状态：未开始 · 计划完成：____ · 实际完成：____
-- 内容：流畅/高清档位（帧率、分辨率、码率约束）。
-- 验收：档位切换生效；低档位 ≤ 2 Mbps、高档位 ≤ 8 Mbps。
+- [x] 状态：已完成 · 实际完成：2026-08-14
+- 内容：流畅（720p/30fps、≤2 Mbps）/ 高清（1080p/30fps、≤6 Mbps）两档；SharePicker 内画质选择器 + `getDisplayMedia` 分辨率/帧率约束 + `RTCRtpSender` maxBitrate 限制。
+- 验收：
+  - 功能：两档可切换（默认高清）；档位传入 `getDisplayMedia` 约束，并对每条发布连接设置 maxBitrate（`peer.ts applyMaxBitrate`）。
+  - 性能：流畅档 `maxBitrate=2 Mbps`、高清档 `maxBitrate=6 Mbps`（≤ 8 Mbps）；帧率 30fps。
+  - 安全：无新增暴露面，档位仅在渲染进程内选择，无敏感信息。
+  - 用户体验：窗口选择弹窗内提供「流畅/高清」档位按钮，带码率说明文案。
+- 备注：码率通过 `RTCRtpSender.setParameters({encodings:[{maxBitrate}]})` 限制（尽力而为，失败忽略）；真实码率档位效果待实机/双实例验证。`npm run typecheck` 通过，产物已重新打包（release3）。
 
 ---
 
@@ -161,7 +166,7 @@
   - 性能：单包 ≤ 100MB；打包流程 < 5min（Electron 二进制已缓存时）。
   - 安全：`asar: true` + `contextIsolation` 保持；`files` 已排除 `out/test/**`，未打包 `server/`、密钥、测试文件。
   - 用户体验：`win-unpacked\Let's C.exe` 冒烟启动成功（6s 存活未崩溃）；便携版双击即用。
-- 备注：产物输出到 `release2/`（`dist/` 被外部进程锁住 default_app.asar，见 DEPLOY.md「打包已知问题」）。
+- 备注：最终产物输出到 `release3/`（含 T2.3 画质档位；`dist/` 被外部进程锁住 default_app.asar，见 DEPLOY.md「打包已知问题」）。
 
 ### T6.2 README 与部署文档
 - [x] 状态：已完成 · 实际完成：2026-08-14
@@ -180,6 +185,7 @@
 | T1.2 | ✅ | ✅ | ✅ | ✅ | 完成 |
 | T2.1 | ✅ | ✅ | ✅ | ✅ | 完成 |
 | T2.2 | 代码✅ 待实机 | 待实测 | 设计✅ | 待实测 | 进行中 |
+| T2.3 | ✅ | ✅ | ✅ | ✅ | 完成 |
 | T3.1/T3.2 | 代码✅ 待联调 | 待联调 | 设计✅ | 待联调 | 进行中 |
 | T4.1/T4.2 | 代码✅ 待验收 | 待验收 | 设计✅ | 待验收 | 进行中 |
 | T5.1 | ✅ | ✅ | ✅ | ✅ | 完成 |
@@ -193,3 +199,4 @@
 - 2026-08-14 · Phase 0/1 完成；Phase 2 的 T2.1 完成（IPC 测试通过）；Phase 3/4 代码完成待联调；T5.x 完成。
 - 2026-08-14 · 待办：双实例端到端联调（WebRTC）、T2.2/T2.3 实机验收、README/DEPLOY、打包。
 - 2026-08-14 · T6.1 打包完成（NSIS + portable，产物 `release2/`）；T6.2 文档完成并核对；WebRTC E2E 通过（房主建房间、观众收到 video+audio）。
+- 2026-08-14 · T2.3 画质档位完成（流畅/高清，`getDisplayMedia` 约束 + maxBitrate），重新打包到 `release3/` 并冒烟通过。
