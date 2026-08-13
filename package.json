@@ -1,0 +1,31 @@
+{
+  "name": "lets-c",
+  "version": "0.1.0",
+  "description": "Let's C — 共享屏幕、多人一起刷 B 站（P2P）的 Windows 桌面应用",
+  "main": "./out/main/index.js",
+  "author": "chilld-1",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "build:win": "electron-vite build && electron-builder --win"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0"
+  }
+}

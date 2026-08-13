@@ -1,0 +1,14 @@
+{
+  "name": "lets-c-signaling-server",
+  "version": "0.1.0",
+  "description": "Let's C 信令服务器（房间管理 + WebRTC SDP/ICE 转发，媒体不走服务器）",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "ws": "^8.21.3"
+  }
+}

@@ -1,0 +1,13 @@
+node_modules/
+out/
+dist/
+*.log
+.env
+.env.local
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+
+# Reasonix 工具元数据（非项目文件）
+.reasonix/
+reasonix.toml
